@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorteo de Fulbito ⚽</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pitch-dark:#0b3d2e;
+    --pitch:#0f4d38;
+    --pitch-line:rgba(241,250,238,.16);
+    --white:#f1faee;
+    --white-dim:rgba(241,250,238,.62);
+    --amber:#ffb703;
+    --amber-dim:#7a5b0e;
+    --red:#e63946;
+    --card-bg:rgba(241,250,238,.06);
+    --card-border:rgba(241,250,238,.14);
+    --team-colors: #e76f51,#2a9d8f,#8338ec,#ffb703,#3a86ff,#ff5c8a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(90deg, var(--pitch) 0 80px, var(--pitch-dark) 80px 160px);
+    min-height:100vh;
+    font-family:'Inter',sans-serif;
+    color:var(--white);
+    padding:28px 16px 80px;
+    position:relative;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(255,183,3,.08), transparent 60%),
+      linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45));
+    pointer-events:none;
+    z-index:0;
+  }
+  .wrap{max-width:640px;margin:0 auto;position:relative;z-index:1;}
+
+  header{text-align:center;margin-bottom:22px;}
+  .eyebrow{
+    font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--amber); font-weight:700; margin-bottom:6px;
+  }
+  h1{
+    font-family:'Anton',sans-serif;
+    font-weight:400;
+    font-size:clamp(34px,8vw,52px);
+    letter-spacing:.01em;
+    margin:0;
+    line-height:.95;
+    text-shadow:0 2px 0 rgba(0,0,0,.35);
+  }
+  h1 span{color:var(--amber);}
+  .sub{color:var(--white-dim);font-size:14px;margin-top:8px;}
+  .shared-note{
+    display:inline-flex;align-items:center;gap:6px;
+    background:rgba(255,183,3,.1);border:1px solid rgba(255,183,3,.3);
+    color:var(--amber);font-size:11.5px;font-weight:700;
+    padding:6px 12px;border-radius:20px;margin-top:12px;
+  }
+
+  .card{
+    background:var(--card-bg);
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:18px;
+    backdrop-filter:blur(6px);
+  }
+  .card h2{
+    font-family:'Anton',sans-serif;font-weight:400;
+    font-size:20px;letter-spacing:.03em;
+    margin:0 0 14px;display:flex;align-items:center;gap:8px;
+  }
+  .card h2 .num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:24px;height:24px;border-radius:50%;
+    background:var(--amber);color:var(--pitch-dark);
+    font-family:'Inter',sans-serif;font-weight:800;font-size:12px;
+  }
+  .card .hint{font-size:12.5px;color:var(--white-dim);margin:-6px 0 14px;}
+
+  .add-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .add-row input[type=text]{
+    flex:1;min-width:160px;
+    background:rgba(0,0,0,.25);
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    padding:11px 14px;
+    color:var(--white);
+    font-size:15px;
+    font-family:'Inter',sans-serif;
+  }
+  .add-row input::placeholder{color:var(--white-dim);}
+  .add-row input:focus{outline:2px solid var(--amber);outline-offset:1px;}
+  .btn{
+    border:none;border-radius:10px;cursor:pointer;
+    font-family:'Inter',sans-serif;font-weight:700;font-size:14px;
+    padding:11px 18px;transition:transform .12s ease, filter .12s ease;
+  }
+  .btn:active{transform:scale(.96);}
+  .btn-primary{background:var(--amber);color:var(--pitch-dark);}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-primary:disabled{opacity:.5;cursor:default;}
+  .btn-ghost{background:transparent;color:var(--white);border:1px solid var(--card-border);}
+  .btn-ghost:hover{background:rgba(241,250,238,.08);}
+  .btn-ghost:disabled{opacity:.4;cursor:default;}
+
+  .players-list{display:flex;flex-direction:column;gap:8px;}
+  .player-row{
+    display:flex;align-items:center;gap:10px;
+    background:rgba(0,0,0,.22);
+    border:1px solid var(--card-border);
+    border-radius:10px;padding:9px 12px;
+    animation:pop .25s ease;
+  }
+  @keyframes pop{from{opacity:0;transform:translateY(-6px) scale(.97);}to{opacity:1;transform:none;}}
+  .jersey{
+    width:30px;height:30px;border-radius:8px;
+    background:var(--pitch-dark);border:1px solid var(--amber-dim);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Anton',sans-serif;font-size:14px;color:var(--amber);
+    flex-shrink:0;
+  }
+  .player-row .name{flex:1;font-weight:600;font-size:15px;}
+  .player-row .rating-badge{font-size:11.5px;color:var(--white-dim);text-align:right;line-height:1.3;}
+  .player-row .rating-badge .stars{color:var(--amber);display:block;font-size:12px;}
+  .player-row .del{
+    background:none;border:none;color:var(--white-dim);cursor:pointer;font-size:17px;line-height:1;padding:4px;
+  }
+  .player-row .del:hover{color:var(--red);}
+  .empty-hint{color:var(--white-dim);font-size:13px;padding:10px 2px;}
+
+  .config-row{display:flex;flex-wrap:wrap;gap:22px;align-items:center;}
+  .config-group{display:flex;flex-direction:column;gap:8px;}
+  .config-label{font-size:12px;color:var(--white-dim);text-transform:uppercase;letter-spacing:.08em;}
+  .pill-group{display:flex;gap:6px;}
+  .pill{
+    padding:8px 14px;border-radius:20px;border:1px solid var(--card-border);
+    background:rgba(0,0,0,.22);color:var(--white-dim);cursor:pointer;font-weight:700;font-size:14px;
+  }
+  .pill.active{background:var(--amber);color:var(--pitch-dark);border-color:var(--amber);}
+  .switch{display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;}
+  .switch .track{width:40px;height:22px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid var(--card-border);position:relative;transition:background .15s;}
+  .switch .thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--white-dim);transition:transform .18s ease, background .18s;}
+  .switch.on .track{background:var(--amber-dim);}
+  .switch.on .thumb{transform:translateX(18px);background:var(--amber);}
+  .switch .label{font-size:14px;color:var(--white-dim);}
+
+  .whistle-btn{
+    display:block;width:100%;
+    background:linear-gradient(180deg, var(--red), #b81f2d);
+    color:var(--white);
+    font-family:'Anton',sans-serif;font-size:24px;letter-spacing:.04em;
+    border:none;border-radius:16px;padding:20px;
+    cursor:pointer;
+    box-shadow:0 8px 0 #7f1420, 0 12px 24px rgba(0,0,0,.4);
+    transition:transform .08s ease, box-shadow .08s ease;
+    margin:22px 0;
+  }
+  .whistle-btn:active{transform:translateY(6px);box-shadow:0 2px 0 #7f1420, 0 6px 14px rgba(0,0,0,.4);}
+  .whistle-btn:disabled{opacity:.5;cursor:default;}
+  .whistle-btn small{display:block;font-family:'Inter',sans-serif;font-weight:600;font-size:12px;letter-spacing:.05em;opacity:.85;margin-top:2px;}
+
+  .teams-grid{display:flex;flex-direction:column;gap:14px;}
+  .team-card{
+    border-radius:16px;padding:16px 16px 14px;
+    background:rgba(0,0,0,.28);
+    border:1px solid var(--card-border);
+    border-top:5px solid var(--tc,var(--amber));
+    opacity:0;transform:translateY(14px);
+    animation:teamIn .5s ease forwards;
+  }
+  @keyframes teamIn{to{opacity:1;transform:none;}}
+  .team-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+  .team-head h3{font-family:'Anton',sans-serif;font-weight:400;font-size:19px;color:var(--tc,var(--amber));margin:0;}
+  .team-head .avg{font-size:11px;color:var(--white-dim);}
+  .team-players{display:flex;flex-direction:column;gap:6px;}
+  .team-player{
+    display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;
+    padding:7px 10px;border-radius:8px;background:rgba(241,250,238,.05);
+    opacity:0;animation:slideIn .35s ease forwards;
+  }
+  @keyframes slideIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:none;}}
+  .team-player .cap{color:var(--amber);font-size:13px;}
+
+  .result-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .coin-area{display:flex;align-items:center;gap:12px;justify-content:center;margin-top:6px;}
+  .coin{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #ffe08a, var(--amber) 70%);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 3px 8px rgba(0,0,0,.4);}
+  .coin.flip{animation:flip .8s ease;}
+  @keyframes flip{0%{transform:rotateY(0);}100%{transform:rotateY(1440deg);}}
+  .coin-result{font-weight:700;font-size:14px;}
+
+  /* Rating flow */
+  .rating-box{
+    margin-top:18px;padding-top:16px;border-top:1px dashed var(--card-border);
+  }
+  .rating-progress{font-size:12.5px;color:var(--white-dim);margin-bottom:12px;}
+  .whoami-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+  .whoami-pill{
+    padding:9px 15px;border-radius:20px;border:1px solid var(--card-border);
+    background:rgba(0,0,0,.22);color:var(--white);cursor:pointer;font-weight:600;font-size:14px;
+  }
+  .whoami-pill:hover{border-color:var(--amber);}
+  .rate-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 12px;background:rgba(0,0,0,.2);border-radius:10px;margin-bottom:8px;
+  }
+  .rate-row .name{font-weight:600;font-size:14.5px;}
+  .star-picker{display:flex;gap:3px;}
+  .star-picker button{
+    background:none;border:none;font-size:22px;cursor:pointer;color:rgba(241,250,238,.25);
+    padding:2px;line-height:1;transition:transform .08s;
+  }
+  .star-picker button:hover{transform:scale(1.15);}
+  .star-picker button.on{color:var(--amber);}
+  .who-am-i-note{font-size:12.5px;color:var(--white-dim);margin-bottom:14px;}
+  .who-am-i-note button{background:none;border:none;color:var(--amber);cursor:pointer;font-weight:700;font-size:12.5px;text-decoration:underline;padding:0;}
+  .voted-msg{
+    background:rgba(42,157,143,.12);border:1px solid rgba(42,157,143,.4);
+    color:#7fe0d2;padding:12px 14px;border-radius:10px;font-size:13.5px;font-weight:600;
+  }
+
+  .history-toggle{
+    width:100%;background:none;border:1px solid var(--card-border);
+    color:var(--white-dim);border-radius:12px;padding:12px;font-weight:700;
+    cursor:pointer;font-size:13px;letter-spacing:.04em;text-transform:uppercase;
+  }
+  .history-list{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
+  .history-item{background:rgba(0,0,0,.22);border:1px solid var(--card-border);border-radius:10px;padding:12px 14px;font-size:13px;}
+  .history-item .date{color:var(--amber);font-weight:700;font-size:12px;margin-bottom:6px;}
+  .history-item .teams-line{color:var(--white-dim);line-height:1.6;}
+  .history-item .teams-line b{color:var(--white);}
+
+  .ranking-list{display:flex;flex-direction:column;gap:7px;}
+  .rank-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(0,0,0,.2);border-radius:10px;}
+  .rank-row .pos{width:22px;font-family:'Anton',sans-serif;color:var(--white-dim);font-size:15px;}
+  .rank-row .name{flex:1;font-weight:600;font-size:14.5px;}
+  .rank-row .avg{color:var(--amber);font-weight:700;font-size:14px;}
+  .rank-row .votes{color:var(--white-dim);font-size:11.5px;}
+
+  .confetti{position:fixed;top:-10px;width:8px;height:14px;z-index:50;pointer-events:none;animation:fall linear forwards;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(600deg);opacity:.2;}}
+
+  footer{text-align:center;color:var(--white-dim);font-size:12px;margin-top:30px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s !important;transition-duration:.001s !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Miércoles de fútbol</div>
+    <h1>SORTEO DE <span>EQUIPOS</span></h1>
+    <div class="sub">Cargá a los pibes, sorteá los equipos y calificá después de jugar</div>
+    <div class="shared-note">🔗 Todo lo que ves acá es compartido con quien entre por este mismo link</div>
+  </header>
+
+  <section class="card">
+    <h2><span class="num">1</span>Plantilla</h2>
+    <div class="add-row">
+      <input type="text" id="nameInput" placeholder="Nombre del compañero/a" maxlength="24">
+      <button class="btn btn-primary" id="addBtn">Agregar</button>
+    </div>
+    <div class="players-list" id="playersList"></div>
+    <div class="empty-hint" id="emptyHint">Todavía no cargaste a nadie. ¡Sumá a tus compañeros!</div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">2</span>Configuración</h2>
+    <div class="config-row">
+      <div class="config-group">
+        <div class="config-label">Cantidad de equipos</div>
+        <div class="pill-group" id="teamsPillGroup"></div>
+      </div>
+      <div class="config-group">
+        <div class="config-label">Balanceo</div>
+        <div class="switch" id="balanceSwitch">
+          <div class="track"><div class="thumb"></div></div>
+          <div class="label">Equilibrar por nivel votado</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <button class="whistle-btn" id="sortearBtn">
+    🔴 SORTEAR EQUIPOS
+    <small id="sortearHint">Cargá al menos 2 jugadores</small>
+  </button>
+
+  <section class="card" id="resultCard" style="display:none;">
+    <h2><span class="num">3</span>Resultado</h2>
+    <div class="teams-grid" id="teamsGrid"></div>
+    <div class="result-actions">
+      <button class="btn btn-ghost" id="copyBtn">📋 Copiar para el grupo</button>
+      <button class="btn btn-ghost" id="reshuffleBtn">🔄 Sortear de nuevo</button>
+    </div>
+    <div class="coin-area">
+      <button class="btn btn-ghost" id="coinBtn">🪙 Cara o cruz (quién arranca)</button>
+    </div>
+
+    <div class="rating-box" id="ratingBox"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">★</span>Ranking</h2>
+    <div class="hint">Promedio de las calificaciones anónimas que recibió cada uno.</div>
+    <div class="ranking-list" id="rankingList"></div>
+  </section>
+
+  <button class="history-toggle" id="historyToggle">Ver historial de sorteos ▾</button>
+  <div class="history-list" id="historyList" style="display:none;"></div>
+
+  <footer>Jugadores, historial y calificaciones se guardan compartidos entre todos los que usan este link.</footer>
+</div>
+
+<script>
+(function(){
+  let players = [];       // [{name}]
+  let history = [];       // past sorteos
+  let ratings = {};        // { name: {sum, count} }
+  let matchVoters = {};    // { matchId: [voterName,...] }
+  let myName = null;       // personal, this browser
+  let numTeams = 2;
+  let balanceByLevel = false;
+  let lastTeams = null;
+  let currentMatchId = null;
+  let ratingDraft = {};    // { targetName: score } for current voting session
+
+  const nameInput = document.getElementById('nameInput');
+  const addBtn = document.getElementById('addBtn');
+  const playersList = document.getElementById('playersList');
+  const emptyHint = document.getElementById('emptyHint');
+  const teamsPillGroup = document.getElementById('teamsPillGroup');
+  const balanceSwitch = document.getElementById('balanceSwitch');
+  const sortearBtn = document.getElementById('sortearBtn');
+  const sortearHint = document.getElementById('sortearHint');
+  const resultCard = document.getElementById('resultCard');
+  const teamsGrid = document.getElementById('teamsGrid');
+  const copyBtn = document.getElementById('copyBtn');
+  const reshuffleBtn = document.getElementById('reshuffleBtn');
+  const coinBtn = document.getElementById('coinBtn');
+  const historyToggle = document.getElementById('historyToggle');
+  const historyList = document.getElementById('historyList');
+  const rankingList = document.getElementById('rankingList');
+  const ratingBox = document.getElementById('ratingBox');
+
+  const TEAM_COLORS = getComputedStyle(document.documentElement).getPropertyValue('--team-colors').split(',').map(s=>s.trim());
+  const TEAM_NAMES = ['Verde','Amarillo','Rojo','Azul','Violeta','Rosa'];
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---- storage ----
+  async function loadData(){
+    try{ const r = await window.storage.get('players', true); players = r ? JSON.parse(r.value) : []; }catch(e){ players = []; }
+    try{ const r = await window.storage.get('history', true); history = r ? JSON.parse(r.value) : []; }catch(e){ history = []; }
+    try{ const r = await window.storage.get('ratings', true); ratings = r ? JSON.parse(r.value) : {}; }catch(e){ ratings = {}; }
+    try{ const r = await window.storage.get('match_voters', true); matchVoters = r ? JSON.parse(r.value) : {}; }catch(e){ matchVoters = {}; }
+    try{ const r = await window.storage.get('my_name', false); myName = r ? JSON.parse(r.value) : null; }catch(e){ myName = null; }
+    renderPlayers();
+    renderHistory();
+    renderRanking();
+  }
+  const savePlayers = () => window.storage.set('players', JSON.stringify(players), true).catch(()=>{});
+  const saveHistory = () => window.storage.set('history', JSON.stringify(history), true).catch(()=>{});
+  const saveRatings = () => window.storage.set('ratings', JSON.stringify(ratings), true).catch(()=>{});
+  const saveMatchVoters = () => window.storage.set('match_voters', JSON.stringify(matchVoters), true).catch(()=>{});
+  const saveMyName = () => window.storage.set('my_name', JSON.stringify(myName), false).catch(()=>{});
+
+  function avgOf(name){
+    const r = ratings[name];
+    if(!r || !r.count) return null;
+    return r.sum / r.count;
+  }
+  function effectiveLevel(name){
+    const a = avgOf(name);
+    if(a === null) return 3;
+    return Math.min(5, Math.max(1, Math.round(a)));
+  }
+  function starsHtml(avg){
+    const rounded = Math.round(avg);
+    return '★'.repeat(rounded) + '☆'.repeat(5-rounded);
+  }
+
+  // ---- teams pill selector ----
+  function renderTeamsPills(){
+    teamsPillGroup.innerHTML = '';
+    [2,3,4].forEach(n=>{
+      const b = document.createElement('button');
+      b.className = 'pill' + (n===numTeams ? ' active':'');
+      b.textContent = n;
+      b.addEventListener('click', ()=>{ numTeams = n; renderTeamsPills(); updateSortearState(); });
+      teamsPillGroup.appendChild(b);
+    });
+  }
+  renderTeamsPills();
+
+  balanceSwitch.addEventListener('click', ()=>{
+    balanceByLevel = !balanceByLevel;
+    balanceSwitch.classList.toggle('on', balanceByLevel);
+  });
+
+  // ---- players list ----
+  function renderPlayers(){
+    playersList.innerHTML = '';
+    emptyHint.style.display = players.length ? 'none' : 'block';
+    players.forEach((p, idx)=>{
+      const avg = avgOf(p.name);
+      const r = ratings[p.name];
+      const badge = avg === null
+        ? 'Sin calificar'
+        : `<span class="stars">${starsHtml(avg)}</span>${avg.toFixed(1)} · ${r.count} voto${r.count===1?'':'s'}`;
+      const row = document.createElement('div');
+      row.className = 'player-row';
+      row.innerHTML = `
+        <div class="jersey">${idx+1}</div>
+        <div class="name">${escapeHtml(p.name)}</div>
+        <div class="rating-badge">${badge}</div>
+        <button class="del" title="Quitar" data-idx="${idx}">✕</button>
+      `;
+      playersList.appendChild(row);
+    });
+    playersList.querySelectorAll('.del').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const i = parseInt(e.currentTarget.dataset.idx,10);
+        players.splice(i,1);
+        savePlayers();
+        renderPlayers();
+        updateSortearState();
+      });
+    });
+    updateSortearState();
+  }
+
+  function addPlayer(){
+    const name = nameInput.value.trim();
+    if(!name) return;
+    if(players.some(p=>p.name.toLowerCase()===name.toLowerCase())){
+      nameInput.value=''; nameInput.focus(); return;
+    }
+    players.push({ name });
+    nameInput.value = '';
+    savePlayers();
+    renderPlayers();
+    renderRanking();
+    nameInput.focus();
+  }
+  addBtn.addEventListener('click', addPlayer);
+  nameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') addPlayer(); });
+
+  function updateSortearState(){
+    const enough = players.length >= Math.max(2, numTeams);
+    sortearBtn.disabled = !enough;
+    sortearHint.textContent = enough
+      ? `${players.length} jugador${players.length===1?'':'es'} listos`
+      : `Cargá al menos ${Math.max(2,numTeams)} jugadores`;
+  }
+
+  // ---- sorting logic ----
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  function buildTeams(){
+    const teams = Array.from({length:numTeams}, ()=>[]);
+    if(balanceByLevel){
+      const sorted = shuffle(players).sort((a,b)=> effectiveLevel(b.name) - effectiveLevel(a.name));
+      let dir = 1, t = 0;
+      sorted.forEach(p=>{
+        teams[t].push(p);
+        t += dir;
+        if(t === numTeams){ t = numTeams-1; dir = -1; }
+        else if(t === -1){ t = 0; dir = 1; }
+      });
+    } else {
+      const sh = shuffle(players);
+      sh.forEach((p,i)=> teams[i % numTeams].push(p));
+    }
+    return teams.map(t => ({
+      players: t,
+      captainIdx: t.length ? Math.floor(Math.random()*t.length) : -1
+    }));
+  }
+
+  function teamAvgLevel(team){
+    if(!team.players.length) return 0;
+    const sum = team.players.reduce((s,p)=>s+effectiveLevel(p.name),0);
+    return (sum/team.players.length).toFixed(1);
+  }
+
+  function renderTeams(teams){
+    teamsGrid.innerHTML = '';
+    teams.forEach((team, i)=>{
+      const color = TEAM_COLORS[i % TEAM_COLORS.length];
+      const card = document.createElement('div');
+      card.className = 'team-card';
+      card.style.setProperty('--tc', color);
+      card.style.animationDelay = (i*0.12)+'s';
+      const playersHtml = team.players.map((p, pi)=>{
+        const isCap = pi === team.captainIdx;
+        return `<div class="team-player" style="animation-delay:${(i*0.12 + 0.25 + pi*0.08)}s">
+          <span>${escapeHtml(p.name)}</span>
+          ${isCap ? '<span class="cap">👑 capitán/a</span>' : ''}
+        </div>`;
+      }).join('');
+      card.innerHTML = `
+        <div class="team-head">
+          <h3>Equipo ${TEAM_NAMES[i % TEAM_NAMES.length]}</h3>
+          ${balanceByLevel ? `<div class="avg">Nivel prom. ${teamAvgLevel(team)}</div>` : ''}
+        </div>
+        <div class="team-players">${playersHtml}</div>
+      `;
+      teamsGrid.appendChild(card);
+    });
+  }
+
+  function burstConfetti(){
+    for(let i=0;i<50;i++){
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.style.left = Math.random()*100+'vw';
+      el.style.background = TEAM_COLORS[i % TEAM_COLORS.length];
+      el.style.animationDuration = (2.2 + Math.random()*1.4)+'s';
+      el.style.opacity = 0.85+Math.random()*.15;
+      document.body.appendChild(el);
+      setTimeout(()=> el.remove(), 4000);
+    }
+  }
+
+  function formatTeamsForShare(teams){
+    let out = '⚽ Sorteo de equipos\n\n';
+    teams.forEach((team,i)=>{
+      out += `Equipo ${TEAM_NAMES[i % TEAM_NAMES.length]}:\n`;
+      team.players.forEach((p,pi)=>{
+        out += `- ${p.name}${pi===team.captainIdx ? ' (capitán/a)' : ''}\n`;
+      });
+      out += '\n';
+    });
+    return out.trim();
+  }
+
+  async function sortear(){
+    sortearBtn.disabled = true;
+    resultCard.style.display = 'block';
+    teamsGrid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--white-dim);">Barajando... 🔀</div>';
+    ratingBox.innerHTML = '';
+    resultCard.scrollIntoView({behavior:'smooth', block:'start'});
+    await new Promise(r=>setTimeout(r, 650));
+
+    const teams = buildTeams();
+    lastTeams = teams;
+    currentMatchId = 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    ratingDraft = {};
+    renderTeams(teams);
+    burstConfetti();
+
+    history.unshift({
+      matchId: currentMatchId,
+      date: new Date().toLocaleString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+      teams: teams.map(t => ({
+        players: t.players.map(p=>p.name),
+        captain: t.captainIdx>=0 ? t.players[t.captainIdx].name : null
+      }))
+    });
+    if(history.length > 20) history = history.slice(0,20);
+    saveHistory();
+    renderHistory();
+    updateSortearState();
+    renderRatingBox();
+  }
+  sortearBtn.addEventListener('click', sortear);
+  reshuffleBtn.addEventListener('click', sortear);
+
+  copyBtn.addEventListener('click', ()=>{
+    if(!lastTeams) return;
+    const text = formatTeamsForShare(lastTeams);
+    navigator.clipboard.writeText(text).then(()=>{
+      copyBtn.textContent = '✅ Copiado';
+      setTimeout(()=> copyBtn.textContent = '📋 Copiar para el grupo', 1500);
+    }).catch(()=>{ alert(text); });
+  });
+
+  coinBtn.addEventListener('click', ()=>{
+    const area = document.querySelector('.coin-area');
+    area.innerHTML = `<div class="coin flip" id="coinEl">🪙</div><div class="coin-result" id="coinRes">Girando...</div>`;
+    setTimeout(()=>{
+      const result = Math.random() < 0.5 ? 'Cara' : 'Cruz';
+      document.getElementById('coinRes').textContent = `Salió: ${result}`;
+    }, 800);
+  });
+
+  // ---- rating flow ----
+  function matchPlayersFlat(){
+    if(!lastTeams) return [];
+    return lastTeams.flatMap(t => t.players.map(p=>p.name));
+  }
+
+  function renderRatingBox(){
+    const flat = matchPlayersFlat();
+    const voters = matchVoters[currentMatchId] || [];
+
+    if(myName && voters.includes(myName)){
+      ratingBox.innerHTML = `
+        <div class="voted-msg">✅ ¡Gracias, ${escapeHtml(myName)}! Ya calificaste este partido.</div>
+        <div class="rating-progress" style="margin-top:10px;">${voters.length}/${flat.length} compañeros ya calificaron.</div>
+      `;
+      return;
+    }
+
+    if(!myName || !flat.includes(myName)){
+      // ask who am I
+      ratingBox.innerHTML = `
+        <div class="rating-progress">${voters.length}/${flat.length} compañeros ya calificaron este partido.</div>
+        <h2 style="font-size:17px;">⭐ Calificar este partido</h2>
+        <div class="hint">Decinos quién sos para empezar (no se les va a mostrar a los demás qué votaste vos).</div>
+        <div class="whoami-grid" id="whoamiGrid"></div>
+      `;
+      const grid = document.getElementById('whoamiGrid');
+      flat.forEach(n=>{
+        const b = document.createElement('button');
+        b.className = 'whoami-pill';
+        b.textContent = n;
+        b.addEventListener('click', ()=>{
+          myName = n;
+          saveMyName();
+          renderRatingBox();
+        });
+        grid.appendChild(b);
+      });
+      return;
+    }
+
+    // rating step
+    const targets = flat.filter(n => n !== myName);
+    ratingBox.innerHTML = `
+      <div class="rating-progress">${voters.length}/${flat.length} compañeros ya calificaron este partido.</div>
+      <h2 style="font-size:17px;">⭐ Calificar este partido</h2>
+      <div class="who-am-i-note">Calificando como <b>${escapeHtml(myName)}</b> · <button id="changeWhoami">no soy yo</button></div>
+      <div id="rateRows"></div>
+      <button class="btn btn-primary" id="submitRatings" style="width:100%;margin-top:6px;">Enviar calificaciones</button>
+    `;
+    document.getElementById('changeWhoami').addEventListener('click', ()=>{ myName = null; renderRatingBox(); });
+
+    const rateRows = document.getElementById('rateRows');
+    targets.forEach(target=>{
+      const row = document.createElement('div');
+      row.className = 'rate-row';
+      const starsWrap = document.createElement('div');
+      starsWrap.className = 'star-picker';
+      for(let s=1; s<=5; s++){
+        const sb = document.createElement('button');
+        sb.textContent = '★';
+        sb.dataset.score = s;
+        sb.addEventListener('click', ()=>{
+          ratingDraft[target] = s;
+          [...starsWrap.children].forEach(c=> c.classList.toggle('on', parseInt(c.dataset.score,10) <= s));
+        });
+        starsWrap.appendChild(sb);
+      }
+      row.innerHTML = `<div class="name">${escapeHtml(target)}</div>`;
+      row.appendChild(starsWrap);
+      rateRows.appendChild(row);
+    });
+
+    document.getElementById('submitRatings').addEventListener('click', async ()=>{
+      const rated = Object.keys(ratingDraft).filter(k => targets.includes(k));
+      if(!rated.length){ alert('Elegí al menos una estrella para alguien.'); return; }
+      rated.forEach(target=>{
+        const score = ratingDraft[target];
+        if(!ratings[target]) ratings[target] = { sum:0, count:0 };
+        ratings[target].sum += score;
+        ratings[target].count += 1;
+      });
+      if(!matchVoters[currentMatchId]) matchVoters[currentMatchId] = [];
+      matchVoters[currentMatchId].push(myName);
+      await saveRatings();
+      await saveMatchVoters();
+      ratingDraft = {};
+      renderPlayers();
+      renderRanking();
+      renderRatingBox();
+    });
+  }
+
+  // ---- ranking ----
+  function renderRanking(){
+    rankingList.innerHTML = '';
+    const rated = players
+      .map(p => ({ name:p.name, avg: avgOf(p.name), count: (ratings[p.name]||{}).count || 0 }))
+      .filter(p => p.count > 0)
+      .sort((a,b)=> b.avg - a.avg);
+    if(!rated.length){
+      rankingList.innerHTML = '<div class="empty-hint">Todavía no hay calificaciones. Se completa después de cada partido.</div>';
+      return;
+    }
+    const medals = ['🥇','🥈','🥉'];
+    rated.forEach((p,i)=>{
+      const row = document.createElement('div');
+      row.className = 'rank-row';
+      row.innerHTML = `
+        <div class="pos">${medals[i] || (i+1)}</div>
+        <div class="name">${escapeHtml(p.name)}</div>
+        <div class="avg">${p.avg.toFixed(1)} ★</div>
+        <div class="votes">${p.count} voto${p.count===1?'':'s'}</div>
+      `;
+      rankingList.appendChild(row);
+    });
+  }
+
+  // ---- history ----
+  function renderHistory(){
+    historyList.innerHTML = '';
+    if(!history.length){
+      historyList.innerHTML = '<div class="empty-hint">Todavía no hay sorteos guardados.</div>';
+      return;
+    }
+    history.forEach(h=>{
+      const div = document.createElement('div');
+      div.className = 'history-item';
+      const teamsLine = h.teams.map((t,i)=> `<b>${TEAM_NAMES[i % TEAM_NAMES.length]}:</b> ${t.players.join(', ')}`).join(' &nbsp;|&nbsp; ');
+      div.innerHTML = `<div class="date">${h.date}</div><div class="teams-line">${teamsLine}</div>`;
+      historyList.appendChild(div);
+    });
+  }
+  historyToggle.addEventListener('click', ()=>{
+    const open = historyList.style.display !== 'none';
+    historyList.style.display = open ? 'none' : 'block';
+    historyToggle.textContent = open ? 'Ver historial de sorteos ▾' : 'Ocultar historial ▴';
+  });
+
+  loadData();
+})();
+</script>
+</body>
+</html>
