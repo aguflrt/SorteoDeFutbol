@@ -6,6 +6,8 @@
 <title>Sorteo de Picadito ⚽</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
 <style>
   :root{
     --pitch-dark:#0b3d2e;
@@ -262,7 +264,7 @@
     <div class="eyebrow">Viernes de picadito</div>
     <h1>SORTEO DE <span>EQUIPOS</span></h1>
     <div class="sub">Cargá a la banda, sorteá los equipos y calificá después de jugar</div>
-    <div class="shared-note">🔗 Todo lo que ves acá es compartido con quien entre por este mismo link</div>
+    <div class="shared-note">🔗 Sincronizado en vivo: todos los que abren este link ven lo mismo, al instante</div>
   </header>
  
   <section class="card">
@@ -361,25 +363,84 @@
     return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
  
-  // ---- storage ----
-  async function loadData(){
-    try{ const r = await window.storage.get('players', true); players = r ? JSON.parse(r.value) : []; }catch(e){ players = []; }
-    try{ const r = await window.storage.get('history', true); history = r ? JSON.parse(r.value) : []; }catch(e){ history = []; }
-    try{ const r = await window.storage.get('ratings', true); ratings = r ? JSON.parse(r.value) : {}; }catch(e){ ratings = {}; }
-    try{ const r = await window.storage.get('match_voters', true); matchVoters = r ? JSON.parse(r.value) : {}; }catch(e){ matchVoters = {}; }
-    try{ const r = await window.storage.get('my_name', false); myName = r ? JSON.parse(r.value) : null; }catch(e){ myName = null; }
-    renderPlayers();
-    renderHistory();
-    renderRanking();
+  // ---- storage: Firebase Realtime Database, sincronizado en vivo entre todos los dispositivos ----
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_HIx6UF0MKSWEyfs8tkMZHYZHYaMIkJ0",
+    authDomain: "sorteo-fulbito.firebaseapp.com",
+    databaseURL: "https://sorteo-fulbito-default-rtdb.firebaseio.com",
+    projectId: "sorteo-fulbito",
+    storageBucket: "sorteo-fulbito.firebasestorage.app",
+    messagingSenderId: "133999534083",
+    appId: "1:133999534083:web:8ea0477ecbb072c8742e36"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const playersRef = db.ref('players');
+  const historyRef = db.ref('history');
+  const ratingsRef = db.ref('ratings');
+  const matchVotersRef = db.ref('match_voters');
+  const currentMatchRef = db.ref('current_match');
+ 
+  // Firebase no permite '.', '#', '$', '[', ']', '/' en las claves -> las "limpiamos" para usar nombres como clave
+  function ratingKey(name){ return name.replace(/[.#$\/\[\]]/g, '_'); }
+ 
+  const savePlayers = () => playersRef.set(players).catch(e=>console.error('players', e));
+  const saveHistory = () => historyRef.set(history).catch(e=>console.error('history', e));
+  const saveRatings = () => ratingsRef.set(ratings).catch(e=>console.error('ratings', e));
+  const saveMatchVoters = () => matchVotersRef.set(matchVoters).catch(e=>console.error('match_voters', e));
+ 
+  // myName es algo personal de cada dispositivo, no se comparte -> se queda en localStorage
+  function loadMyName(){
+    try{ return localStorage.getItem('sorteo:my_name'); }catch(e){ return null; }
   }
-  const savePlayers = () => window.storage.set('players', JSON.stringify(players), true).catch(()=>{});
-  const saveHistory = () => window.storage.set('history', JSON.stringify(history), true).catch(()=>{});
-  const saveRatings = () => window.storage.set('ratings', JSON.stringify(ratings), true).catch(()=>{});
-  const saveMatchVoters = () => window.storage.set('match_voters', JSON.stringify(matchVoters), true).catch(()=>{});
-  const saveMyName = () => window.storage.set('my_name', JSON.stringify(myName), false).catch(()=>{});
+  function saveMyName(){
+    try{ localStorage.setItem('sorteo:my_name', myName || ''); }catch(e){}
+  }
+  myName = loadMyName() || null;
+ 
+  let firstMatchSnapshot = true;
+ 
+  function setupRealtimeSync(){
+    playersRef.on('value', snap=>{
+      players = snap.val() || [];
+      renderPlayers();
+      renderRanking();
+    }, e=>console.error('players sync', e));
+ 
+    historyRef.on('value', snap=>{
+      history = snap.val() || [];
+      renderHistory();
+    }, e=>console.error('history sync', e));
+ 
+    ratingsRef.on('value', snap=>{
+      ratings = snap.val() || {};
+      renderPlayers();
+      renderRanking();
+      renderRatingBox();
+    }, e=>console.error('ratings sync', e));
+ 
+    matchVotersRef.on('value', snap=>{
+      matchVoters = snap.val() || {};
+      renderRatingBox();
+    }, e=>console.error('match_voters sync', e));
+ 
+    currentMatchRef.on('value', snap=>{
+      const data = snap.val();
+      if(!data){ firstMatchSnapshot = false; return; }
+      const isNewMatch = !firstMatchSnapshot && data.matchId !== currentMatchId;
+      lastTeams = data.teams || [];
+      currentMatchId = data.matchId;
+      ratingDraft = {};
+      resultCard.style.display = 'block';
+      renderTeams(lastTeams);
+      renderRatingBox();
+      if(isNewMatch) burstConfetti();
+      firstMatchSnapshot = false;
+    }, e=>console.error('current_match sync', e));
+  }
  
   function avgOf(name){
-    const r = ratings[name];
+    const r = ratings[ratingKey(name)];
     if(!r || !r.count) return null;
     return r.sum / r.count;
   }
@@ -564,14 +625,14 @@
     await new Promise(r=>setTimeout(r, 650));
  
     const teams = buildTeams();
-    lastTeams = teams;
-    currentMatchId = 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-    ratingDraft = {};
-    renderTeams(teams);
-    burstConfetti();
+    const matchId = 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+ 
+    // Publicamos el sorteo en Firebase: el listener de currentMatchRef se encarga
+    // de pintarlo (en esta pantalla y en la de todos los demás) y de tirar el confetti.
+    await currentMatchRef.set({ matchId, teams }).catch(e=>console.error('current_match', e));
  
     history.unshift({
-      matchId: currentMatchId,
+      matchId,
       date: new Date().toLocaleString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}),
       teams: teams.map(t => ({
         players: t.players.map(p=>p.name),
@@ -580,9 +641,7 @@
     });
     if(history.length > 20) history = history.slice(0,20);
     saveHistory();
-    renderHistory();
     updateSortearState();
-    renderRatingBox();
   }
   sortearBtn.addEventListener('click', sortear);
   reshuffleBtn.addEventListener('click', sortear);
@@ -679,22 +738,34 @@
     });
  
     document.getElementById('submitRatings').addEventListener('click', async ()=>{
+      const submitBtn = document.getElementById('submitRatings');
       const rated = Object.keys(ratingDraft).filter(k => targets.includes(k));
       if(!rated.length){ alert('Elegí al menos una estrella para alguien.'); return; }
-      rated.forEach(target=>{
-        const score = ratingDraft[target];
-        if(!ratings[target]) ratings[target] = { sum:0, count:0 };
-        ratings[target].sum += score;
-        ratings[target].count += 1;
-      });
-      if(!matchVoters[currentMatchId]) matchVoters[currentMatchId] = [];
-      matchVoters[currentMatchId].push(myName);
-      await saveRatings();
-      await saveMatchVoters();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enviando...';
+      try{
+        // transaction() suma de forma atómica, así dos votos al mismo tiempo no se pisan entre sí
+        await Promise.all(rated.map(target=>{
+          const score = ratingDraft[target];
+          return ratingsRef.child(ratingKey(target)).transaction(cur=>{
+            const base = cur || { sum:0, count:0 };
+            return { sum: base.sum + score, count: base.count + 1 };
+          });
+        }));
+        await matchVotersRef.child(currentMatchId).transaction(cur=>{
+          const arr = Array.isArray(cur) ? cur : [];
+          if(!arr.includes(myName)) arr.push(myName);
+          return arr;
+        });
+      }catch(e){
+        console.error('submit ratings', e);
+        alert('No se pudo enviar. Revisá tu conexión e intentá de nuevo.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Enviar calificaciones';
+        return;
+      }
       ratingDraft = {};
-      renderPlayers();
-      renderRanking();
-      renderRatingBox();
+      // los listeners de ratingsRef/matchVotersRef ya se encargan de refrescar la pantalla
     });
   }
  
@@ -744,9 +815,8 @@
     historyToggle.textContent = open ? 'Ver historial de sorteos ▾' : 'Ocultar historial ▴';
   });
  
-  loadData();
+  setupRealtimeSync();
 })();
 </script>
 </body>
 </html>
-
