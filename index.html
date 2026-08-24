@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sorteo de Fulbito ⚽</title>
+<title>Sorteo de partidos ⚽</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
@@ -44,7 +44,7 @@
     z-index:0;
   }
   .wrap{max-width:640px;margin:0 auto;position:relative;z-index:1;}
- 
+
   header{text-align:center;margin-bottom:22px;}
   .eyebrow{
     font-size:11px;letter-spacing:.28em;text-transform:uppercase;
@@ -67,7 +67,7 @@
     color:var(--amber);font-size:11.5px;font-weight:700;
     padding:6px 12px;border-radius:20px;margin-top:12px;
   }
- 
+
   .card{
     background:var(--card-bg);
     border:1px solid var(--card-border);
@@ -88,7 +88,7 @@
     font-family:'Inter',sans-serif;font-weight:800;font-size:12px;
   }
   .card .hint{font-size:12.5px;color:var(--white-dim);margin:-6px 0 14px;}
- 
+
   .add-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
   .add-row input[type=text]{
     flex:1;min-width:160px;
@@ -114,7 +114,7 @@
   .btn-ghost{background:transparent;color:var(--white);border:1px solid var(--card-border);}
   .btn-ghost:hover{background:rgba(241,250,238,.08);}
   .btn-ghost:disabled{opacity:.4;cursor:default;}
- 
+
   .players-list{display:flex;flex-direction:column;gap:8px;}
   .player-row{
     display:flex;align-items:center;gap:10px;
@@ -139,7 +139,7 @@
   }
   .player-row .del:hover{color:var(--red);}
   .empty-hint{color:var(--white-dim);font-size:13px;padding:10px 2px;}
- 
+
   .config-row{display:flex;flex-wrap:wrap;gap:22px;align-items:center;}
   .config-group{display:flex;flex-direction:column;gap:8px;}
   .config-label{font-size:12px;color:var(--white-dim);text-transform:uppercase;letter-spacing:.08em;}
@@ -155,7 +155,7 @@
   .switch.on .track{background:var(--amber-dim);}
   .switch.on .thumb{transform:translateX(18px);background:var(--amber);}
   .switch .label{font-size:14px;color:var(--white-dim);}
- 
+
   .whistle-btn{
     display:block;width:100%;
     background:linear-gradient(180deg, var(--red), #b81f2d);
@@ -170,7 +170,7 @@
   .whistle-btn:active{transform:translateY(6px);box-shadow:0 2px 0 #7f1420, 0 6px 14px rgba(0,0,0,.4);}
   .whistle-btn:disabled{opacity:.5;cursor:default;}
   .whistle-btn small{display:block;font-family:'Inter',sans-serif;font-weight:600;font-size:12px;letter-spacing:.05em;opacity:.85;margin-top:2px;}
- 
+
   .teams-grid{display:flex;flex-direction:column;gap:14px;}
   .team-card{
     border-radius:16px;padding:16px 16px 14px;
@@ -192,14 +192,14 @@
   }
   @keyframes slideIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:none;}}
   .team-player .cap{color:var(--amber);font-size:13px;}
- 
+
   .result-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
   .coin-area{display:flex;align-items:center;gap:12px;justify-content:center;margin-top:6px;}
   .coin{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #ffe08a, var(--amber) 70%);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 3px 8px rgba(0,0,0,.4);}
   .coin.flip{animation:flip .8s ease;}
   @keyframes flip{0%{transform:rotateY(0);}100%{transform:rotateY(1440deg);}}
   .coin-result{font-weight:700;font-size:14px;}
- 
+
   /* Rating flow */
   .rating-box{
     margin-top:18px;padding-top:16px;border-top:1px dashed var(--card-border);
@@ -229,7 +229,7 @@
     background:rgba(42,157,143,.12);border:1px solid rgba(42,157,143,.4);
     color:#7fe0d2;padding:12px 14px;border-radius:10px;font-size:13.5px;font-weight:600;
   }
- 
+
   .history-toggle{
     width:100%;background:none;border:1px solid var(--card-border);
     color:var(--white-dim);border-radius:12px;padding:12px;font-weight:700;
@@ -240,19 +240,35 @@
   .history-item .date{color:var(--amber);font-weight:700;font-size:12px;margin-bottom:6px;}
   .history-item .teams-line{color:var(--white-dim);line-height:1.6;}
   .history-item .teams-line b{color:var(--white);}
- 
+
   .ranking-list{display:flex;flex-direction:column;gap:7px;}
   .rank-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(0,0,0,.2);border-radius:10px;}
   .rank-row .pos{width:22px;font-family:'Anton',sans-serif;color:var(--white-dim);font-size:15px;}
   .rank-row .name{flex:1;font-weight:600;font-size:14.5px;}
   .rank-row .avg{color:var(--amber);font-weight:700;font-size:14px;}
   .rank-row .votes{color:var(--white-dim);font-size:11.5px;}
- 
+
   .confetti{position:fixed;top:-10px;width:8px;height:14px;z-index:50;pointer-events:none;animation:fall linear forwards;}
   @keyframes fall{to{transform:translateY(110vh) rotate(600deg);opacity:.2;}}
- 
+
   footer{text-align:center;color:var(--white-dim);font-size:12px;margin-top:30px;}
- 
+
+  .admin-locked{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  }
+  .admin-locked .msg{font-size:13.5px;color:var(--white-dim);}
+  .admin-locked .msg b{color:var(--white);}
+  .admin-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .admin-form input[type=password]{
+    background:rgba(0,0,0,.25);border:1px solid var(--card-border);border-radius:10px;
+    padding:9px 12px;color:var(--white);font-size:14px;width:130px;
+  }
+  .admin-form input:focus{outline:2px solid var(--amber);outline-offset:1px;}
+  .admin-error{color:var(--red);font-size:12.5px;margin-top:8px;}
+  .admin-on{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .admin-on .msg{font-size:13.5px;color:var(--amber);font-weight:700;}
+  .admin-link{background:none;border:none;color:var(--amber);cursor:pointer;font-weight:700;font-size:13px;text-decoration:underline;padding:0;}
+
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:.001s !important;transition-duration:.001s !important;}
   }
@@ -261,12 +277,14 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Miércoles de fútbol</div>
     <h1>SORTEO DE <span>EQUIPOS</span></h1>
     <div class="sub">Cargá a los pibes, sorteá los equipos y calificá después de jugar</div>
     <div class="shared-note">🔗 Sincronizado en vivo: todos los que abren este link ven lo mismo, al instante</div>
   </header>
- 
+
+  <section class="card" id="adminGate"></section>
+
+  <div id="adminZone">
   <section class="card">
     <h2><span class="num">1</span>Plantilla</h2>
     <div class="add-row">
@@ -276,7 +294,7 @@
     <div class="players-list" id="playersList"></div>
     <div class="empty-hint" id="emptyHint">Todavía no cargaste a nadie. ¡Sumá a tus compañeros!</div>
   </section>
- 
+
   <section class="card">
     <h2><span class="num">2</span>Configuración</h2>
     <div class="config-row">
@@ -293,12 +311,13 @@
       </div>
     </div>
   </section>
- 
+
   <button class="whistle-btn" id="sortearBtn">
     🔴 SORTEAR EQUIPOS
     <small id="sortearHint">Cargá al menos 2 jugadores</small>
   </button>
- 
+  </div>
+
   <section class="card" id="resultCard" style="display:none;">
     <h2><span class="num">3</span>Resultado</h2>
     <div class="teams-grid" id="teamsGrid"></div>
@@ -309,22 +328,22 @@
     <div class="coin-area">
       <button class="btn btn-ghost" id="coinBtn">🪙 Cara o cruz (quién arranca)</button>
     </div>
- 
+
     <div class="rating-box" id="ratingBox"></div>
   </section>
- 
+
   <section class="card">
     <h2><span class="num">★</span>Ranking</h2>
     <div class="hint">Promedio de las calificaciones anónimas que recibió cada uno.</div>
     <div class="ranking-list" id="rankingList"></div>
   </section>
- 
+
   <button class="history-toggle" id="historyToggle">Ver historial de sorteos ▾</button>
   <div class="history-list" id="historyList" style="display:none;"></div>
- 
+
   <footer>Jugadores, historial y calificaciones se guardan compartidos entre todos los que usan este link.</footer>
 </div>
- 
+
 <script>
 (function(){
   let players = [];       // [{name}]
@@ -337,7 +356,7 @@
   let lastTeams = null;
   let currentMatchId = null;
   let ratingDraft = {};    // { targetName: score } for current voting session
- 
+
   const nameInput = document.getElementById('nameInput');
   const addBtn = document.getElementById('addBtn');
   const playersList = document.getElementById('playersList');
@@ -355,15 +374,67 @@
   const historyList = document.getElementById('historyList');
   const rankingList = document.getElementById('rankingList');
   const ratingBox = document.getElementById('ratingBox');
- 
+  const adminGate = document.getElementById('adminGate');
+  const adminZone = document.getElementById('adminZone');
+
   const TEAM_COLORS = getComputedStyle(document.documentElement).getPropertyValue('--team-colors').split(',').map(s=>s.trim());
   const TEAM_NAMES = ['Verde','Amarillo','Rojo','Azul','Violeta','Rosa'];
- 
+
   function escapeHtml(s){
     return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
- 
-  // ---- storage: Firebase Realtime Database, sincronizado en vivo entre todos los dispositivos ----
+
+  // ---- modo administrador: solo quien tenga el código puede gestionar la plantilla y sortear ----
+  // Ojo: como esto es un archivo estático (sin backend propio), el PIN vive en el código.
+  // No es seguridad "bancaria", pero alcanza para que los compañeros no anden sorteando sin querer.
+  const ADMIN_PIN = "picadito2026";
+  let isAdmin = false;
+  try{ isAdmin = localStorage.getItem('sorteo:is_admin') === '1'; }catch(e){ isAdmin = false; }
+
+  function renderAdminGate(){
+    adminZone.style.display = isAdmin ? 'block' : 'none';
+    reshuffleBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
+    if(isAdmin){
+      adminGate.innerHTML = `
+        <div class="admin-on">
+          <div class="msg">🔑 Modo administrador activado</div>
+          <button class="admin-link" id="logoutAdmin">Salir del modo admin</button>
+        </div>
+      `;
+      document.getElementById('logoutAdmin').addEventListener('click', ()=>{
+        isAdmin = false;
+        try{ localStorage.removeItem('sorteo:is_admin'); }catch(e){}
+        renderAdminGate();
+      });
+      return;
+    }
+
+    adminGate.innerHTML = `
+      <div class="admin-locked">
+        <div class="msg">🔒 Solo el <b>administrador</b> arma la plantilla y sortea los equipos. Vos podés calificar después de cada partido.</div>
+        <div class="admin-form">
+          <input type="password" id="adminPinInput" placeholder="Código de admin">
+          <button class="btn btn-primary" id="adminPinBtn">Entrar</button>
+        </div>
+      </div>
+      <div class="admin-error" id="adminError" style="display:none;">Código incorrecto.</div>
+    `;
+    const submit = ()=>{
+      const val = document.getElementById('adminPinInput').value;
+      if(val === ADMIN_PIN){
+        isAdmin = true;
+        try{ localStorage.setItem('sorteo:is_admin', '1'); }catch(e){}
+        renderAdminGate();
+      } else {
+        document.getElementById('adminError').style.display = 'block';
+      }
+    };
+    document.getElementById('adminPinBtn').addEventListener('click', submit);
+    document.getElementById('adminPinInput').addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+  }
+
+
   const firebaseConfig = {
     apiKey: "AIzaSyC_HIx6UF0MKSWEyfs8tkMZHYZHYaMIkJ0",
     authDomain: "sorteo-fulbito.firebaseapp.com",
@@ -380,15 +451,15 @@
   const ratingsRef = db.ref('ratings');
   const matchVotersRef = db.ref('match_voters');
   const currentMatchRef = db.ref('current_match');
- 
+
   // Firebase no permite '.', '#', '$', '[', ']', '/' en las claves -> las "limpiamos" para usar nombres como clave
   function ratingKey(name){ return name.replace(/[.#$\/\[\]]/g, '_'); }
- 
+
   const savePlayers = () => playersRef.set(players).catch(e=>console.error('players', e));
   const saveHistory = () => historyRef.set(history).catch(e=>console.error('history', e));
   const saveRatings = () => ratingsRef.set(ratings).catch(e=>console.error('ratings', e));
   const saveMatchVoters = () => matchVotersRef.set(matchVoters).catch(e=>console.error('match_voters', e));
- 
+
   // myName es algo personal de cada dispositivo, no se comparte -> se queda en localStorage
   function loadMyName(){
     try{ return localStorage.getItem('sorteo:my_name'); }catch(e){ return null; }
@@ -397,33 +468,33 @@
     try{ localStorage.setItem('sorteo:my_name', myName || ''); }catch(e){}
   }
   myName = loadMyName() || null;
- 
+
   let firstMatchSnapshot = true;
- 
+
   function setupRealtimeSync(){
     playersRef.on('value', snap=>{
       players = snap.val() || [];
       renderPlayers();
       renderRanking();
     }, e=>console.error('players sync', e));
- 
+
     historyRef.on('value', snap=>{
       history = snap.val() || [];
       renderHistory();
     }, e=>console.error('history sync', e));
- 
+
     ratingsRef.on('value', snap=>{
       ratings = snap.val() || {};
       renderPlayers();
       renderRanking();
       renderRatingBox();
     }, e=>console.error('ratings sync', e));
- 
+
     matchVotersRef.on('value', snap=>{
       matchVoters = snap.val() || {};
       renderRatingBox();
     }, e=>console.error('match_voters sync', e));
- 
+
     currentMatchRef.on('value', snap=>{
       const data = snap.val();
       if(!data){ firstMatchSnapshot = false; return; }
@@ -438,7 +509,7 @@
       firstMatchSnapshot = false;
     }, e=>console.error('current_match sync', e));
   }
- 
+
   function avgOf(name){
     const r = ratings[ratingKey(name)];
     if(!r || !r.count) return null;
@@ -453,7 +524,7 @@
     const rounded = Math.round(avg);
     return '★'.repeat(rounded) + '☆'.repeat(5-rounded);
   }
- 
+
   // ---- teams pill selector ----
   function renderTeamsPills(){
     teamsPillGroup.innerHTML = '';
@@ -466,12 +537,12 @@
     });
   }
   renderTeamsPills();
- 
+
   balanceSwitch.addEventListener('click', ()=>{
     balanceByLevel = !balanceByLevel;
     balanceSwitch.classList.toggle('on', balanceByLevel);
   });
- 
+
   // ---- players list ----
   function renderPlayers(){
     playersList.innerHTML = '';
@@ -494,6 +565,7 @@
     });
     playersList.querySelectorAll('.del').forEach(btn=>{
       btn.addEventListener('click', (e)=>{
+        if(!isAdmin) return;
         const i = parseInt(e.currentTarget.dataset.idx,10);
         players.splice(i,1);
         savePlayers();
@@ -503,8 +575,9 @@
     });
     updateSortearState();
   }
- 
+
   function addPlayer(){
+    if(!isAdmin) return;
     const name = nameInput.value.trim();
     if(!name) return;
     if(players.some(p=>p.name.toLowerCase()===name.toLowerCase())){
@@ -519,7 +592,7 @@
   }
   addBtn.addEventListener('click', addPlayer);
   nameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') addPlayer(); });
- 
+
   function updateSortearState(){
     const enough = players.length >= Math.max(2, numTeams);
     sortearBtn.disabled = !enough;
@@ -527,7 +600,7 @@
       ? `${players.length} jugador${players.length===1?'':'es'} listos`
       : `Cargá al menos ${Math.max(2,numTeams)} jugadores`;
   }
- 
+
   // ---- sorting logic ----
   function shuffle(arr){
     const a = arr.slice();
@@ -537,7 +610,7 @@
     }
     return a;
   }
- 
+
   function buildTeams(){
     const teams = Array.from({length:numTeams}, ()=>[]);
     if(balanceByLevel){
@@ -558,13 +631,13 @@
       captainIdx: t.length ? Math.floor(Math.random()*t.length) : -1
     }));
   }
- 
+
   function teamAvgLevel(team){
     if(!team.players.length) return 0;
     const sum = team.players.reduce((s,p)=>s+effectiveLevel(p.name),0);
     return (sum/team.players.length).toFixed(1);
   }
- 
+
   function renderTeams(teams){
     teamsGrid.innerHTML = '';
     teams.forEach((team, i)=>{
@@ -590,7 +663,7 @@
       teamsGrid.appendChild(card);
     });
   }
- 
+
   function burstConfetti(){
     for(let i=0;i<50;i++){
       const el = document.createElement('div');
@@ -603,7 +676,7 @@
       setTimeout(()=> el.remove(), 4000);
     }
   }
- 
+
   function formatTeamsForShare(teams){
     let out = '⚽ Sorteo de equipos\n\n';
     teams.forEach((team,i)=>{
@@ -615,22 +688,23 @@
     });
     return out.trim();
   }
- 
+
   async function sortear(){
+    if(!isAdmin) return;
     sortearBtn.disabled = true;
     resultCard.style.display = 'block';
     teamsGrid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--white-dim);">Barajando... 🔀</div>';
     ratingBox.innerHTML = '';
     resultCard.scrollIntoView({behavior:'smooth', block:'start'});
     await new Promise(r=>setTimeout(r, 650));
- 
+
     const teams = buildTeams();
     const matchId = 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
- 
+
     // Publicamos el sorteo en Firebase: el listener de currentMatchRef se encarga
     // de pintarlo (en esta pantalla y en la de todos los demás) y de tirar el confetti.
     await currentMatchRef.set({ matchId, teams }).catch(e=>console.error('current_match', e));
- 
+
     history.unshift({
       matchId,
       date: new Date().toLocaleString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}),
@@ -645,7 +719,7 @@
   }
   sortearBtn.addEventListener('click', sortear);
   reshuffleBtn.addEventListener('click', sortear);
- 
+
   copyBtn.addEventListener('click', ()=>{
     if(!lastTeams) return;
     const text = formatTeamsForShare(lastTeams);
@@ -654,7 +728,7 @@
       setTimeout(()=> copyBtn.textContent = '📋 Copiar para el grupo', 1500);
     }).catch(()=>{ alert(text); });
   });
- 
+
   coinBtn.addEventListener('click', ()=>{
     const area = document.querySelector('.coin-area');
     area.innerHTML = `<div class="coin flip" id="coinEl">🪙</div><div class="coin-result" id="coinRes">Girando...</div>`;
@@ -663,17 +737,17 @@
       document.getElementById('coinRes').textContent = `Salió: ${result}`;
     }, 800);
   });
- 
+
   // ---- rating flow ----
   function matchPlayersFlat(){
     if(!lastTeams) return [];
     return lastTeams.flatMap(t => t.players.map(p=>p.name));
   }
- 
+
   function renderRatingBox(){
     const flat = matchPlayersFlat();
     const voters = matchVoters[currentMatchId] || [];
- 
+
     if(myName && voters.includes(myName)){
       ratingBox.innerHTML = `
         <div class="voted-msg">✅ ¡Gracias, ${escapeHtml(myName)}! Ya calificaste este partido.</div>
@@ -681,7 +755,7 @@
       `;
       return;
     }
- 
+
     if(!myName || !flat.includes(myName)){
       // ask who am I
       ratingBox.innerHTML = `
@@ -704,7 +778,7 @@
       });
       return;
     }
- 
+
     // rating step
     const targets = flat.filter(n => n !== myName);
     ratingBox.innerHTML = `
@@ -715,7 +789,7 @@
       <button class="btn btn-primary" id="submitRatings" style="width:100%;margin-top:6px;">Enviar calificaciones</button>
     `;
     document.getElementById('changeWhoami').addEventListener('click', ()=>{ myName = null; renderRatingBox(); });
- 
+
     const rateRows = document.getElementById('rateRows');
     targets.forEach(target=>{
       const row = document.createElement('div');
@@ -736,7 +810,7 @@
       row.appendChild(starsWrap);
       rateRows.appendChild(row);
     });
- 
+
     document.getElementById('submitRatings').addEventListener('click', async ()=>{
       const submitBtn = document.getElementById('submitRatings');
       const rated = Object.keys(ratingDraft).filter(k => targets.includes(k));
@@ -768,7 +842,7 @@
       // los listeners de ratingsRef/matchVotersRef ya se encargan de refrescar la pantalla
     });
   }
- 
+
   // ---- ranking ----
   function renderRanking(){
     rankingList.innerHTML = '';
@@ -793,7 +867,7 @@
       rankingList.appendChild(row);
     });
   }
- 
+
   // ---- history ----
   function renderHistory(){
     historyList.innerHTML = '';
@@ -814,7 +888,8 @@
     historyList.style.display = open ? 'none' : 'block';
     historyToggle.textContent = open ? 'Ver historial de sorteos ▾' : 'Ocultar historial ▴';
   });
- 
+
+  renderAdminGate();
   setupRealtimeSync();
 })();
 </script>
