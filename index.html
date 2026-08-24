@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sorteo de partidos ⚽</title>
+<title>Sorteo de Picadito ⚽</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
@@ -278,7 +278,7 @@
 <div class="wrap">
   <header>
     <h1>SORTEO DE <span>EQUIPOS</span></h1>
-    <div class="sub">Cargá a los pibes, sorteá los equipos y calificá después de jugar</div>
+    <div class="sub">Cargá a la banda, sorteá los equipos y calificá después de jugar</div>
     <div class="shared-note">🔗 Sincronizado en vivo: todos los que abren este link ven lo mismo, al instante</div>
   </header>
 
@@ -293,6 +293,8 @@
     </div>
     <div class="players-list" id="playersList"></div>
     <div class="empty-hint" id="emptyHint">Todavía no cargaste a nadie. ¡Sumá a tus compañeros!</div>
+    <button class="history-toggle" id="archivedToggle" style="margin-top:12px;">Ver jugadores dados de baja ▾</button>
+    <div class="history-list" id="archivedList" style="display:none;"></div>
   </section>
 
   <section class="card">
@@ -361,6 +363,8 @@
   const addBtn = document.getElementById('addBtn');
   const playersList = document.getElementById('playersList');
   const emptyHint = document.getElementById('emptyHint');
+  const archivedToggle = document.getElementById('archivedToggle');
+  const archivedList = document.getElementById('archivedList');
   const teamsPillGroup = document.getElementById('teamsPillGroup');
   const balanceSwitch = document.getElementById('balanceSwitch');
   const sortearBtn = document.getElementById('sortearBtn');
@@ -372,6 +376,11 @@
   const coinBtn = document.getElementById('coinBtn');
   const historyToggle = document.getElementById('historyToggle');
   const historyList = document.getElementById('historyList');
+  archivedToggle.addEventListener('click', ()=>{
+    const open = archivedList.style.display !== 'none';
+    archivedList.style.display = open ? 'none' : 'block';
+    renderArchived();
+  });
   const rankingList = document.getElementById('rankingList');
   const ratingBox = document.getElementById('ratingBox');
   const adminGate = document.getElementById('adminGate');
@@ -543,23 +552,29 @@
     balanceSwitch.classList.toggle('on', balanceByLevel);
   });
 
-  // ---- players list ----
+  // ---- players list (plantilla fija: "dar de baja" archiva, no borra stats) ----
+  function isActive(p){ return p.active !== false; }
+  function ratingBadgeHtml(name){
+    const avg = avgOf(name);
+    const r = ratings[ratingKey(name)];
+    return avg === null
+      ? 'Sin calificar'
+      : `<span class="stars">${starsHtml(avg)}</span>${avg.toFixed(1)} · ${r.count} voto${r.count===1?'':'s'}`;
+  }
+
   function renderPlayers(){
+    const active = players.filter(isActive);
     playersList.innerHTML = '';
-    emptyHint.style.display = players.length ? 'none' : 'block';
-    players.forEach((p, idx)=>{
-      const avg = avgOf(p.name);
-      const r = ratings[p.name];
-      const badge = avg === null
-        ? 'Sin calificar'
-        : `<span class="stars">${starsHtml(avg)}</span>${avg.toFixed(1)} · ${r.count} voto${r.count===1?'':'s'}`;
+    emptyHint.style.display = active.length ? 'none' : 'block';
+    active.forEach((p, idx)=>{
+      const realIdx = players.indexOf(p);
       const row = document.createElement('div');
       row.className = 'player-row';
       row.innerHTML = `
         <div class="jersey">${idx+1}</div>
         <div class="name">${escapeHtml(p.name)}</div>
-        <div class="rating-badge">${badge}</div>
-        <button class="del" title="Quitar" data-idx="${idx}">✕</button>
+        <div class="rating-badge">${ratingBadgeHtml(p.name)}</div>
+        <button class="del" title="Dar de baja (mantiene sus stats)" data-idx="${realIdx}">✕</button>
       `;
       playersList.appendChild(row);
     });
@@ -567,23 +582,69 @@
       btn.addEventListener('click', (e)=>{
         if(!isAdmin) return;
         const i = parseInt(e.currentTarget.dataset.idx,10);
-        players.splice(i,1);
+        players[i].active = false;
         savePlayers();
         renderPlayers();
         updateSortearState();
       });
     });
+    renderArchived();
     updateSortearState();
+  }
+
+  function renderArchived(){
+    const archived = players.filter(p=>!isActive(p));
+    const isOpen = archivedList.style.display !== 'none';
+    archivedToggle.textContent = isOpen
+      ? `Ocultar jugadores dados de baja (${archived.length}) ▴`
+      : `Ver jugadores dados de baja (${archived.length}) ▾`;
+    archivedList.innerHTML = '';
+    if(!archived.length){
+      archivedList.innerHTML = '<div class="empty-hint">No hay nadie dado de baja.</div>';
+      return;
+    }
+    archived.forEach(p=>{
+      const realIdx = players.indexOf(p);
+      const row = document.createElement('div');
+      row.className = 'player-row';
+      row.innerHTML = `
+        <div class="jersey">🗄️</div>
+        <div class="name">${escapeHtml(p.name)}</div>
+        <div class="rating-badge">${ratingBadgeHtml(p.name)}</div>
+        ${isAdmin ? `<button class="btn btn-ghost restore-btn" data-idx="${realIdx}" style="padding:6px 10px;font-size:12px;">↩️ Reincorporar</button>` : ''}
+      `;
+      archivedList.appendChild(row);
+    });
+    if(isAdmin){
+      archivedList.querySelectorAll('.restore-btn').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          const i = parseInt(e.currentTarget.dataset.idx,10);
+          players[i].active = true;
+          savePlayers();
+          renderPlayers();
+          updateSortearState();
+        });
+      });
+    }
   }
 
   function addPlayer(){
     if(!isAdmin) return;
     const name = nameInput.value.trim();
     if(!name) return;
-    if(players.some(p=>p.name.toLowerCase()===name.toLowerCase())){
-      nameInput.value=''; nameInput.focus(); return;
+    const existing = players.find(p=>p.name.toLowerCase()===name.toLowerCase());
+    if(existing){
+      if(isActive(existing)){ nameInput.value=''; nameInput.focus(); return; }
+      // estaba dado de baja: lo reincorporamos y recupera automáticamente sus votos/stats
+      existing.active = true;
+      nameInput.value = '';
+      savePlayers();
+      renderPlayers();
+      renderRanking();
+      nameInput.focus();
+      return;
     }
-    players.push({ name });
+    players.push({ name, active: true });
     nameInput.value = '';
     savePlayers();
     renderPlayers();
@@ -594,10 +655,11 @@
   nameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') addPlayer(); });
 
   function updateSortearState(){
-    const enough = players.length >= Math.max(2, numTeams);
+    const active = players.filter(isActive);
+    const enough = active.length >= Math.max(2, numTeams);
     sortearBtn.disabled = !enough;
     sortearHint.textContent = enough
-      ? `${players.length} jugador${players.length===1?'':'es'} listos`
+      ? `${active.length} jugador${active.length===1?'':'es'} listos`
       : `Cargá al menos ${Math.max(2,numTeams)} jugadores`;
   }
 
@@ -612,9 +674,10 @@
   }
 
   function buildTeams(){
+    const pool = players.filter(isActive);
     const teams = Array.from({length:numTeams}, ()=>[]);
     if(balanceByLevel){
-      const sorted = shuffle(players).sort((a,b)=> effectiveLevel(b.name) - effectiveLevel(a.name));
+      const sorted = shuffle(pool).sort((a,b)=> effectiveLevel(b.name) - effectiveLevel(a.name));
       let dir = 1, t = 0;
       sorted.forEach(p=>{
         teams[t].push(p);
@@ -623,7 +686,7 @@
         else if(t === -1){ t = 0; dir = 1; }
       });
     } else {
-      const sh = shuffle(players);
+      const sh = shuffle(pool);
       sh.forEach((p,i)=> teams[i % numTeams].push(p));
     }
     return teams.map(t => ({
@@ -847,7 +910,8 @@
   function renderRanking(){
     rankingList.innerHTML = '';
     const rated = players
-      .map(p => ({ name:p.name, avg: avgOf(p.name), count: (ratings[p.name]||{}).count || 0 }))
+      .filter(isActive)
+      .map(p => ({ name:p.name, avg: avgOf(p.name), count: (ratings[ratingKey(p.name)]||{}).count || 0 }))
       .filter(p => p.count > 0)
       .sort((a,b)=> b.avg - a.avg);
     if(!rated.length){
